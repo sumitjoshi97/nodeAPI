@@ -1,43 +1,58 @@
 const express = require('express');
+const router = express.Router();
+const Book = require('../models/bookModel');
 
-const routes = function () {
-    const bookRouter = express.Router();
-    const Book = require('../models/bookModel');
+router.get('/', (req, res) => {
 
-    bookRouter.get('/books', (req, res) => {
+    const query = {};
 
-        const query = {};
-
-        if (req.query.genre) {
-            query.genre = req.query.genre;
+    if (req.query.genre) {
+        query.genre = req.query.genre;
+    }
+    Book.find(query, (err, books) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            res.json(books);
         }
-        Book.find(query, (err, books) => {
-            if (err) {
-                res.status(500).send(err);
-            } else {
-                res.json(books);
-            }
-        });
-        // res.json(responseJSON);
     });
+    // res.json(responseJSON);
+});
 
-    bookRouter.post('/books', (req, res) => {
-        const book = new Book(req.body);
-        book.save();
-        // console.log(book);
-        res.status(201).send(book);
-    })
+router.post('/', (req, res) => {
+    const book = new Book(req.body);
+    book.save();
+    // console.log(book);
+    res.status(201).send(book);
+})
 
-    bookRouter.get('./books/:bookId', (req, res) => {
-        Book.findById(req.params.bookId, (err, book) => {
-            if (err) {
-                res.status(500).send(err);
-            } else {
-                res.json(book);
-            }
-        });
+router.get('/:bookId', (req, res) => {
+    Book.findById(req.params.bookId, (err, book) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            res.json(book);
+        }
     });
-    return bookRouter;
-}
+});
 
-module.exports = routes;
+router.put('/:bookId', (req,res)=> {
+    Book.findById(req.params.bookId, (err, book) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            book.title = req.body.title;
+            book.author = req.body.author;
+            book.genre = req.body.genre;
+            book.read = req.body.read;
+            book.save();
+
+            res.json(book);
+        }
+    });
+})
+
+router.patch()
+
+
+module.exports = router;
